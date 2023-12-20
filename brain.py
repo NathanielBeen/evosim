@@ -2,12 +2,13 @@ from typing import List
 import random
 import math
 
-from genome import Genome
+from runConfig import NUM_SENSE, NUM_INTERNAL, NUM_ACTIONS
 from node import NodeType, Node, NodeConnection
+from genome import Genome
 
 class Brain:
-    def __init__(self):
-        self.genome = None
+    def __init__(self, genome: Genome):
+        self.genome = genome
         self.senseNodes: List[Node] = []
         self.innerNodes: List[Node] = []
         self.actionNodes: List[Node] = []
@@ -30,14 +31,19 @@ class Brain:
             inputNodeType = NodeType.SENSE if gene.inputType == 0 else NodeType.INNER
             outputNodeType = NodeType.INNER if gene.outputType == 0 else NodeType.ACTION
 
-            if not gene.inputNum in nodes[inputNodeType]:
-                nodes[inputNodeType][gene.inputNum] = Node(inputNodeType, gene.inputNum)
+            # a gene's input and output ids can be 0 to 999, so use a modulo to convert that value into one that's
+            # garunteed to actually point to a node
+            inputId = gene.inputNum % NUM_SENSE if inputNodeType == NodeType.SENSE else gene.inputNum % NUM_INTERNAL
+            outputId = gene.outputNum % NUM_INTERNAL if inputNodeType == NodeType.INNER else gene.outputNum % NUM_ACTIONS
 
-            if not gene.outputNum in nodes[outputNodeType]:
-                nodes[outputNodeType][gene.outputNum] = Node(outputNodeType, gene.outputNum)
+            if not gene.inputNum in nodes[inputNodeType]:
+                nodes[inputNodeType][inputId] = Node(inputNodeType, inputId)
+
+            if not outputId in nodes[outputNodeType]:
+                nodes[outputNodeType][outputId] = Node(outputNodeType, outputId)
             
-            inputNode: Node = nodes[inputNodeType][gene.inputNum]
-            outputNode: Node = nodes[outputNodeType][gene.outputNum]
+            inputNode: Node = nodes[inputNodeType][inputId]
+            outputNode: Node = nodes[outputNodeType][outputId]
 
             connection = NodeConnection(inputNode, outputNode, gene.weight)
             inputNode.connections.append(connection)
