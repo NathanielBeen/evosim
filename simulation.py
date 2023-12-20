@@ -47,3 +47,8 @@ class Simulation:
             
             organism.loc = proposedLoc
             usedLocations.add(proposedLoc)
+
+    def executeSimStep(self):
+        for organism in self.organisms:
+            organism.performStep()
+        self.simStep += 1
