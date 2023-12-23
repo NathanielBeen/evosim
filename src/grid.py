@@ -1,5 +1,8 @@
 from typing import List
-from organism import Organism
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from organism import Organism
 
 class Coord:
     def __init__(self, x: int, y: int):
@@ -28,6 +31,9 @@ class Coord:
     
     def __eq__(self, other):
         return isinstance(other, Coord) and self.x == other.x and self.y == other.y
+    
+    def __hash__(self) -> int:
+        return hash((self.x, self.y))
 
 
 class Grid:

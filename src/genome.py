@@ -11,11 +11,11 @@ class Gene:
     #   - weight: a float from -4 to 4 that indicates the strength of this connection
     def __init__(self, code: str):
         self.code = code
-        self.inputType = int(code[0])
-        self.inputNum = int(code[1:7])
-        self.outputType = int(code[8])
-        self.outputNum = int(code[9:15])
-        self.weight = (int(code[16:]) / 32 - 4)
+        self.inputType = int(code[0], 2)
+        self.inputNum = int(code[1:7], 2)
+        self.outputType = int(code[8], 2)
+        self.outputNum = int(code[9:15], 2)
+        self.weight = (int(code[16:], 2) / 32 - 4)
 
     # for the first generation there are no parents, so we must generate a random bit string
     @staticmethod

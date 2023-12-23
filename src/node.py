@@ -8,14 +8,18 @@ class NodeType:
 
 
 class Node:
-    def _init__(self, type: NodeType, id: int):
+    def __init__(self, type: NodeType, id: int):
         self.type = type
         self.id = id
         self.connections: List[NodeConnection] = []
         self.value = 0
+        self.willDelete = False
 
     def hasOutput(self):
-        return any(conn.output != self for conn in self.connections)
+        return any(conn.output != self and not conn.output.willDelete for conn in self.connections)
+    
+    def hasInput(self):
+        return any(conn.input != self and not conn.input.willDelete for conn in self.connections)
     
     def applyConnections(self):
         for conn in self.connections:

@@ -1,6 +1,6 @@
 from typing import List
 
-from brain import Brain
+from brain import Brain, Action
 from genome import Genome
 from grid import Coord, Grid
 
@@ -56,29 +56,31 @@ class Organism:
         if senseId == SenseTypes.DISTANCE_FROM_NEAREST_Y_EDGE:
             return min(self.loc.y, self.grid.height - self.loc.y) / (self.grid.height / 2)
  
-    def executeActions(self, actionIds: List[int]):
-        moveActions = [id for id in actionIds if self.actionIsMoveAction(id)]
+    def executeActions(self, actionIds: List[Action]):
+        print(f'LOC: {self.loc.x}, {self.loc.y}')
+        moveActions = [action for action in actionIds if self.actionIsMoveAction(action)]
         if len(moveActions) > 0:
             self.executeMoveActions(moveActions)
+        print(f'LOC: {self.loc.x}, {self.loc.y}')
 
     # combine all the move actions together to create a new proposed location and move to it
     # (as long as that location is in bounds and unoccupied)
-    def executeMoveActions(self, actionIds: List[int]):
+    def executeMoveActions(self, actions: List[Action]):
         proposedMoveDir = Coord(0, 0)
-        for id in actionIds:
-            if id == ActionTypes.MOVE_POS_X:
+        for action in actions:
+            if action.id == ActionTypes.MOVE_POS_X:
                 proposedMoveDir.x += 1
-            elif id == ActionTypes.MOVE_NEG_X:
+            elif action.id == ActionTypes.MOVE_NEG_X:
                 proposedMoveDir.x -= 1
-            elif id == ActionTypes.MOVE_POS_Y:
+            elif action.id == ActionTypes.MOVE_POS_Y:
                 proposedMoveDir.y += 1
-            elif id == ActionTypes.MOVE_NEG_Y:
+            elif action.id == ActionTypes.MOVE_NEG_Y:
                 proposedMoveDir.y -= 1
         
         proposedMove = self.loc + proposedMoveDir
         if self.grid.locIsValidForMove(proposedMove):
             self.loc = proposedMove
 
-    def actionIsMoveAction(self, actionId: int) -> bool:
-        return actionId == ActionTypes.MOVE_NEG_X or actionId == ActionTypes.MOVE_NEG_Y \
-            or actionId == ActionTypes.MOVE_POS_X or actionId == ActionTypes.MOVE_POS_Y
+    def actionIsMoveAction(self, action: Action) -> bool:
+        return action.id == ActionTypes.MOVE_NEG_X or action.id == ActionTypes.MOVE_NEG_Y \
+            or action.id == ActionTypes.MOVE_POS_X or action.id == ActionTypes.MOVE_POS_Y

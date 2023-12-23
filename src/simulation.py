@@ -26,6 +26,7 @@ class Simulation:
                 newOrganisms.append(Organism.gen_from_parents(parent, parent2))
         
         self.organisms = newOrganisms
+        self.grid.organisms = newOrganisms
 
         usedLocations = set()
         for organism in self.organisms:
