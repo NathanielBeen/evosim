@@ -27,12 +27,12 @@ class Gene:
     # we do this by copying one gene and then splicing a random segment from the other gene into the middle. 
     # After this has been completed we may perform a point mutation on the gene
     @staticmethod
-    def gen_from_parents(parentCode, parent2Code):
-        baseCode = parentCode if random.randint(0, 1) == 0 else parent2Code
-        codeToInsert = parentCode if baseCode == parent2Code else parent2Code
+    def gen_from_parents(parentGene: 'Gene', parent2Gene: 'Gene'):
+        baseCode = parentGene.code if random.randint(0, 1) == 0 else parent2Gene.code
+        codeToInsert = parentGene.code if baseCode == parent2Gene.code else parent2Gene.code
 
-        startInsertIndex = random.randint(0, len(parentCode))
-        endInsertIndex = random.randint(0, len(parentCode))
+        startInsertIndex = random.randint(0, len(baseCode))
+        endInsertIndex = random.randint(0, len(baseCode))
 
         if startInsertIndex > endInsertIndex:
             startInsertIndex, endInsertIndex = endInsertIndex, startInsertIndex
@@ -46,12 +46,14 @@ class Gene:
     def mutateCode(code: str):
         if random.random() < runConfig.MUTATE_CHANCE:
             bitToFlip = random.randint(0, len(code) - 1)
-            code[bitToFlip] = "1" if code[bitToFlip] == "0" else "0"
+            code = code[:bitToFlip] + ("1" if code[bitToFlip] == "0" else "0") + code[bitToFlip+1:]
+
+        return code
 
 
 
 class Genome:
-    def __init__(self, genes):
+    def __init__(self, genes: list[Gene]):
         self.genes = genes
 
     @staticmethod
@@ -59,8 +61,8 @@ class Genome:
         return Genome([Gene.gen_random() for _ in range(runConfig.NUM_GENES)])
 
     @staticmethod
-    def gen_from_parents(self, parentGenome, parent2Genome):
+    def gen_from_parents(parentGenome: 'Genome', parent2Genome: 'Genome'):
         return Genome([
-            Gene.gen_from_parents(parentCode, parent2Code) 
-            for parentCode, parent2Code in zip(parentGenome.genes, parent2Genome.genes)
+            Gene.gen_from_parents(parentGene, parent2Gene) 
+            for parentGene, parent2Gene in zip(parentGenome.genes, parent2Genome.genes)
         ])

@@ -1,21 +1,33 @@
 from typing import List
 import random
 
-from runConfig import GRID_HEIGHT, GRID_WIDTH, NUM_ORGANISMS
+from runConfig import GRID_HEIGHT, GRID_WIDTH, NUM_ORGANISMS, NUM_STEPS_PER_GENERATION, NUM_GENERATIONS
 from grid import Grid, Coord
 from organism import Organism
+from graph import Graph
 
 class Simulation:
     def __init__(self):
         self.grid = Grid(GRID_WIDTH, GRID_HEIGHT)
-        self.simStep = 0
+        self.graph = Graph(self.grid)
         self.organisms: List[Organism] = []
+
+    def runSimulation(self):
+        for i in range(NUM_GENERATIONS):
+            self.createGeneration(i)
+            self.graph.drawFrame(i)
+
+            for _ in range(NUM_STEPS_PER_GENERATION):
+                self.executeSimStep()
+                self.graph.drawFrame(i)
+
+            self.graph.saveVideo(i)
     
     # creates a set of organsisms (either with random genes or based on parents)
     # and places then randomly in the grid
-    def createGeneration(self):
+    def createGeneration(self, generationNumber):
         newOrganisms: List[Organism] = []
-        if self.simStep == 0:
+        if generationNumber == 0:
             newOrganisms = [Organism.gen_random(self.grid) for _ in range(NUM_ORGANISMS)]
         else:
             for _ in range(NUM_ORGANISMS):
@@ -23,7 +35,7 @@ class Simulation:
                 # sophisticated "mating" system that uses proximity or score or something instead
                 parent = self.organisms[random.randint(0, len(self.organisms) - 1)]
                 parent2 = self.organisms[random.randint(0, len(self.organisms) - 1)]
-                newOrganisms.append(Organism.gen_from_parents(parent, parent2))
+                newOrganisms.append(Organism.gen_from_parents(self.grid, parent, parent2))
         
         self.organisms = newOrganisms
         self.grid.organisms = newOrganisms
@@ -52,4 +64,3 @@ class Simulation:
     def executeSimStep(self):
         for organism in self.organisms:
             organism.performStep()
-        self.simStep += 1

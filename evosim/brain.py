@@ -100,7 +100,6 @@ class Brain:
             # the individual so we need to pass back both the id and the value
             if random.random() < triggerChance:
                 actions.append(Action(node.id, triggerChance))
-                print(f'action {node.id} performed')
 
         return actions
     

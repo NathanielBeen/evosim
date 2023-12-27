@@ -57,11 +57,9 @@ class Organism:
             return min(self.loc.y, self.grid.height - self.loc.y) / (self.grid.height / 2)
  
     def executeActions(self, actionIds: List[Action]):
-        print(f'LOC: {self.loc.x}, {self.loc.y}')
         moveActions = [action for action in actionIds if self.actionIsMoveAction(action)]
         if len(moveActions) > 0:
             self.executeMoveActions(moveActions)
-        print(f'LOC: {self.loc.x}, {self.loc.y}')
 
     # combine all the move actions together to create a new proposed location and move to it
     # (as long as that location is in bounds and unoccupied)
