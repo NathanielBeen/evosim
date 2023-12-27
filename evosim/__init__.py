@@ -5,5 +5,10 @@ simul = Simulation()
 simul.createGeneration()
 
 graph = Graph(simul.grid)
+graph.drawFrame()
 
-simul.executeSimStep()
+for i in range(100):
+    simul.executeSimStep()
+    graph.drawFrame()
+
+graph.saveVideo()
