@@ -4,24 +4,28 @@ import random
 from runConfig import GRID_HEIGHT, GRID_WIDTH, NUM_ORGANISMS, NUM_STEPS_PER_GENERATION, NUM_GENERATIONS
 from grid import Grid, Coord
 from organism import Organism
-from graph import Graph
+from video import Graph
+from survivalCriteria import SideSurvivalType, SideSurvialCriteria
+from graph import drawGraph
 
 class Simulation:
     def __init__(self):
         self.grid = Grid(GRID_WIDTH, GRID_HEIGHT)
-        self.graph = Graph(self.grid)
+        self.survivalStrategy = SideSurvialCriteria(SideSurvivalType.LEFT, 32)
+        self.graph = Graph(self.grid, self.survivalStrategy)
         self.organisms: List[Organism] = []
 
     def runSimulation(self):
-        for i in range(NUM_GENERATIONS):
-            self.createGeneration(i)
-            self.graph.drawFrame(i)
+        for gen in range(NUM_GENERATIONS):
+            self.createGeneration(gen)
 
             for _ in range(NUM_STEPS_PER_GENERATION):
-                self.executeSimStep()
-                self.graph.drawFrame(i)
+                self.executeSimStep(gen)
 
-            self.graph.saveVideo(i)
+            self.graph.saveVideo(gen)
+            self.organisms = self.determineSurvivors()
+        
+        drawGraph(self.organisms[0].brain)
     
     # creates a set of organsisms (either with random genes or based on parents)
     # and places then randomly in the grid
@@ -60,7 +64,13 @@ class Simulation:
             
             organism.loc = proposedLoc
             usedLocations.add(proposedLoc)
+        
+        self.graph.drawFrame(generationNumber)
 
-    def executeSimStep(self):
+    def executeSimStep(self, generationNumber):
         for organism in self.organisms:
             organism.performStep()
+        self.graph.drawFrame(generationNumber)
+
+    def determineSurvivors(self):
+        return [org for org in self.organisms if self.survivalStrategy.survived(org)]

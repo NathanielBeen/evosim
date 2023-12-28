@@ -131,7 +131,17 @@ files = [
 docs = ["furo", "olefile", "sphinx (>=2.4)", "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-removed-in", "sphinxext-opengraph"]
 tests = ["check-manifest", "coverage", "defusedxml", "markdown2", "olefile", "packaging", "pyroma", "pytest", "pytest-cov", "pytest-timeout"]
 
+[[package]]
+name = "pygraphviz"
+version = "1.11"
+description = "Python interface to Graphviz"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "pygraphviz-1.11.zip", hash = "sha256:a97eb5ced266f45053ebb1f2c6c6d29091690503e3a5c14be7f908b37b06f2d4"},
+]
+
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "fe4cff002968b3b0f46bb7c3058073b7c40bdea7018a1f5aa3890180c8741112"
+content-hash = "b75be16889c3b5ffa86e4c307803edc3c562e4c39d9c0a4abc131e1b6763c494"

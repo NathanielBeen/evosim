@@ -1,5 +1,15 @@
 from typing import List
 
+class SenseTypes:
+    DISTANCE_FROM_NEAREST_EDGE = 0
+    DISTANCE_FROM_NEAREST_X_EDGE = 1
+    DISTANCE_FROM_NEAREST_Y_EDGE = 2
+
+class ActionTypes:
+    MOVE_POS_X = 0
+    MOVE_NEG_X = 1
+    MOVE_POS_Y = 2
+    MOVE_NEG_Y = 3
 
 class NodeType:
     SENSE = 0
@@ -32,6 +42,25 @@ class Node:
     
     def reset(self):
         self.value = 0
+
+    def name(self):
+        if self.type == NodeType.SENSE:
+            if self.id == SenseTypes.DISTANCE_FROM_NEAREST_EDGE:
+                return 'dE'
+            if self.id == SenseTypes.DISTANCE_FROM_NEAREST_X_EDGE:
+                return 'dXE'
+            if self.id == SenseTypes.DISTANCE_FROM_NEAREST_Y_EDGE:
+                return 'dYE'
+        if self.type == NodeType.ACTION:
+            if self.id == ActionTypes.MOVE_NEG_X:
+                return 'm-X'
+            if self.id == ActionTypes.MOVE_POS_X:
+                return 'm+X'
+            if self.id == ActionTypes.MOVE_NEG_Y:
+                return 'm-Y'
+            if self.id == ActionTypes.MOVE_POS_Y:
+                return 'm+Y'
+        return str(self.id)
 
 
 class NodeConnection:

@@ -3,17 +3,8 @@ from typing import List
 from brain import Brain, Action
 from genome import Genome
 from grid import Coord, Grid
+from node import SenseTypes, ActionTypes
 
-class SenseTypes:
-    DISTANCE_FROM_NEAREST_EDGE = 0
-    DISTANCE_FROM_NEAREST_X_EDGE = 1
-    DISTANCE_FROM_NEAREST_Y_EDGE = 2
-
-class ActionTypes:
-    MOVE_POS_X = 0
-    MOVE_NEG_X = 1
-    MOVE_POS_Y = 2
-    MOVE_NEG_Y = 3
 
 class Organism:
     def __init__(self, grid: Grid, genome: Genome):
