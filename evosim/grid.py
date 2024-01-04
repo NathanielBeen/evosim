@@ -2,7 +2,7 @@ from typing import List
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from organism import Organism
+    from .organism import Organism
 
 class Coord:
     def __init__(self, x: int, y: int):

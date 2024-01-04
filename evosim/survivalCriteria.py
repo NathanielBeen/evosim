@@ -1,7 +1,7 @@
 from PIL import ImageDraw
 
-from organism import Organism
-from runConfig import GRID_HEIGHT, GRID_WIDTH, IMAGE_SCALING
+from .organism import Organism
+from .runConfig import GRID_HEIGHT, GRID_WIDTH, IMAGE_SCALING
 
 class SideSurvivalType:
     LEFT = 0
@@ -9,6 +9,9 @@ class SideSurvivalType:
     TOP = 2
     BOTTOM = 3
 
+# when used, organisms will survive if they are within a certain distance
+# of one of the boundary, with the distance and which boundary to use
+# being configurable
 class SideSurvialCriteria:
     def __init__(self, type: SideSurvivalType, distance: int):
         self.type = type
@@ -25,6 +28,8 @@ class SideSurvialCriteria:
             return organism.loc.y >= GRID_HEIGHT - self.distance
         return False
     
+    # draw this boundary on the output image in yellow. Note that all values need to be scaled by 
+    # IMAGE_SCALING, as the image has larger dimensions than the size of the grid for improved clarity
     def draw(self, context: ImageDraw):
         coords = (0, 0, 0, 0)
         if self.type == SideSurvivalType.LEFT:

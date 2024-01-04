@@ -61,6 +61,14 @@ class Node:
             if self.id == ActionTypes.MOVE_POS_Y:
                 return 'm+Y'
         return str(self.id)
+    
+    def color(self):
+        if self.type == NodeType.SENSE:
+            return "black"
+        if self.type == NodeType.ACTION:
+            return "gold"
+        if self.type == NodeType.INNER:
+            return "grey"
 
 
 class NodeConnection:
@@ -76,3 +84,9 @@ class NodeConnection:
     
     def applyConnection(self):
         self.output.value += self.input.value * self.weight
+
+    def width(self):
+        return max(abs(self.weight), .5)
+
+    def color(self):
+        return "blue" if self.weight > 0 else "red"

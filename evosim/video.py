@@ -2,10 +2,13 @@ from PIL import Image, ImageDraw
 import cv2
 import os
 import re
+import random
+import math
 
-from grid import Grid
-from survivalCriteria import SideSurvialCriteria
-from runConfig import NUM_GENERATIONS, IMAGE_SCALING
+from .grid import Grid
+from .genome import genome_similarity
+from .survivalCriteria import SideSurvialCriteria
+from .runConfig import NUM_GENERATIONS, IMAGE_SCALING
 
 ASSET_FOLDER = "/home/nathaniel/Dev/evosim_assets"
 
@@ -18,7 +21,7 @@ class Graph:
         self.cleanVideos()
 
     def willRecordGeneration(self, genNumber):
-        return genNumber == 0 or genNumber == NUM_GENERATIONS - 1 or genNumber % 10 == 0
+        return genNumber == NUM_GENERATIONS - 1 or genNumber % 100 == 0
 
     def cleanImages(self):
         for f in os.listdir(ASSET_FOLDER):
@@ -40,10 +43,13 @@ class Graph:
 
         self.survivalCriteria.draw(context)
 
+        if self.numImages == 0:
+            self.determineOrganismColors()
+
         for org in self.grid.organisms:
             context.rectangle((
                 org.loc.x * IMAGE_SCALING, org.loc.y * IMAGE_SCALING, org.loc.x * IMAGE_SCALING + IMAGE_SCALING, org.loc.y * IMAGE_SCALING + IMAGE_SCALING
-            ), fill="#000000")
+            ), fill=org.color.hex())
 
         imagePath = f"/home/nathaniel/Dev/evosim_assets/image_{self.numImages}.png"
         frame.save(imagePath)
@@ -74,3 +80,30 @@ class Graph:
         video.release()
 
         self.cleanImages()
+
+    def determineOrganismColors(self):
+        redBenchmark = self.grid.organisms[random.randint(0, len(self.grid.organisms) - 1)]
+        greenBenchmark = redBenchmark
+        blueBenchmark = redBenchmark
+
+        for org in self.grid.organisms:
+            similarity = genome_similarity(redBenchmark.brain.genome, org.brain.genome)
+            org.color.red = math.floor(similarity * 255)
+
+            if org.color.red < greenBenchmark.color.red:
+                greenBenchmark = org
+        
+        for org in self.grid.organisms:
+            similarity = genome_similarity(greenBenchmark.brain.genome, org.brain.genome)
+            org.color.green = math.floor(similarity * 255)
+
+            if org.color.red + org.color.green < blueBenchmark.color.red + blueBenchmark.color.green:
+                blueBenchmark = org
+            
+        for org in self.grid.organisms:
+            similarity = genome_similarity(blueBenchmark.brain.genome, org.brain.genome)
+            org.color.blue = math.floor(similarity * 255)
+
+        similarity = sum((org.color.red + org.color.green + org.color.blue) / 3 for org in self.grid.organisms) / len(self.grid.organisms)
+        print(similarity)
+

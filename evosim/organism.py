@@ -1,9 +1,19 @@
 from typing import List
 
-from brain import Brain, Action
-from genome import Genome
-from grid import Coord, Grid
-from node import SenseTypes, ActionTypes
+from .brain import Brain, Action
+from .genome import Genome
+from .grid import Coord, Grid
+from .node import SenseTypes, ActionTypes
+
+
+class OrganismColor:
+    def __init__(self):
+        self.red = 0
+        self.green = 0
+        self.blue = 0
+    
+    def hex(self):
+        return '#{:02x}{:02x}{:02x}'.format(self.red, self.green, self.blue)
 
 
 class Organism:
@@ -11,6 +21,7 @@ class Organism:
         self.brain = Brain(genome)
         self.loc = Coord(0, 0)
         self.grid = grid
+        self.color = OrganismColor()
 
     @staticmethod
     def gen_random(grid: Grid):

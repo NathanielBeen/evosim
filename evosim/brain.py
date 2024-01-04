@@ -2,9 +2,8 @@ from typing import List
 import random
 import math
 
-from runConfig import NUM_SENSE, NUM_INTERNAL, NUM_ACTIONS
-from node import NodeType, Node, NodeConnection
-from genome import Genome
+from .node import NodeType, Node, NodeConnection
+from .genome import Genome
 
 class Action:
     def __init__(self, id: int, value: float):
@@ -32,22 +31,14 @@ class Brain:
             NodeType.ACTION: {}
         }
         for gene in self.genome.genes:
-            inputNodeType = NodeType.SENSE if gene.inputType == 0 else NodeType.INNER
-            outputNodeType = NodeType.INNER if gene.outputType == 0 else NodeType.ACTION
+            if not gene.inputId in nodes[gene.inputType]:
+                nodes[gene.inputType][gene.inputId] = Node(gene.inputType, gene.inputId)
 
-            # a gene's input and output ids can be 0 to 999, so use a modulo to convert that value into one that's
-            # garunteed to actually point to a node
-            inputId = gene.inputNum % NUM_SENSE if inputNodeType == NodeType.SENSE else gene.inputNum % NUM_INTERNAL
-            outputId = gene.outputNum % NUM_INTERNAL if inputNodeType == NodeType.INNER else gene.outputNum % NUM_ACTIONS
-
-            if not inputId in nodes[inputNodeType]:
-                nodes[inputNodeType][inputId] = Node(inputNodeType, inputId)
-
-            if not outputId in nodes[outputNodeType]:
-                nodes[outputNodeType][outputId] = Node(outputNodeType, outputId)
+            if not gene.outputId in nodes[gene.outputType]:
+                nodes[gene.outputType][gene.outputId] = Node(gene.outputType, gene.outputId)
             
-            inputNode: Node = nodes[inputNodeType][inputId]
-            outputNode: Node = nodes[outputNodeType][outputId]
+            inputNode: Node = nodes[gene.inputType][gene.inputId]
+            outputNode: Node = nodes[gene.outputType][gene.outputId]
 
             connection = NodeConnection(inputNode, outputNode, gene.weight)
             inputNode.connections.append(connection)

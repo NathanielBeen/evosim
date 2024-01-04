@@ -1,12 +1,12 @@
 from typing import List
 import random
 
-from runConfig import GRID_HEIGHT, GRID_WIDTH, NUM_ORGANISMS, NUM_STEPS_PER_GENERATION, NUM_GENERATIONS
-from grid import Grid, Coord
-from organism import Organism
-from video import Graph
-from survivalCriteria import SideSurvivalType, SideSurvialCriteria
-from graph import drawGraph
+from .runConfig import GRID_HEIGHT, GRID_WIDTH, NUM_ORGANISMS, NUM_STEPS_PER_GENERATION, NUM_GENERATIONS
+from .grid import Grid, Coord
+from .organism import Organism
+from .video import Graph
+from .survivalCriteria import SideSurvivalType, SideSurvialCriteria
+from .graph import drawGraph
 
 class Simulation:
     def __init__(self):
