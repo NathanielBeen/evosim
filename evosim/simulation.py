@@ -1,31 +1,45 @@
 from typing import List
 import random
+import math
 
 from .runConfig import GRID_HEIGHT, GRID_WIDTH, NUM_ORGANISMS, NUM_STEPS_PER_GENERATION, NUM_GENERATIONS
 from .grid import Grid, Coord
 from .organism import Organism
-from .video import Graph
-from .survivalCriteria import SideSurvivalType, SideSurvialCriteria
+from .genome import genome_similarity
+from .video import Video
+from .survivalCriteria import CornerSurvivalCriteria
 from .graph import drawGraph
 
 class Simulation:
     def __init__(self):
         self.grid = Grid(GRID_WIDTH, GRID_HEIGHT)
-        self.survivalStrategy = SideSurvialCriteria(SideSurvivalType.LEFT, 32)
-        self.graph = Graph(self.grid, self.survivalStrategy)
+        self.survivalStrategy = CornerSurvivalCriteria(20)
+        self.video = Video(self.grid, self.survivalStrategy)
         self.organisms: List[Organism] = []
 
     def runSimulation(self):
         for gen in range(NUM_GENERATIONS):
             self.createGeneration(gen)
 
-            for _ in range(NUM_STEPS_PER_GENERATION):
-                self.executeSimStep(gen)
+            willRecord = self.willRecordGeneration(gen)
+            if willRecord:
+                self.determineOrganismColors()
+                self.video.drawFrame()
 
-            self.graph.saveVideo(gen)
+            for _ in range(NUM_STEPS_PER_GENERATION):
+                for organism in self.organisms:
+                    organism.performStep()
+                if willRecord:
+                    self.video.drawFrame()
+
+            if willRecord:
+                self.video.saveVideo(gen)
+                drawGraph(self.organisms, gen)
+
             self.organisms = self.determineSurvivors()
-        
-        drawGraph(self.organisms[0].brain)
+    
+    def willRecordGeneration(self, genNumber):
+        return genNumber == NUM_GENERATIONS - 1 or genNumber % 100 == 0
     
     # creates a set of organsisms (either with random genes or based on parents)
     # and places then randomly in the grid
@@ -64,13 +78,29 @@ class Simulation:
             
             organism.loc = proposedLoc
             usedLocations.add(proposedLoc)
-        
-        self.graph.drawFrame(generationNumber)
-
-    def executeSimStep(self, generationNumber):
-        for organism in self.organisms:
-            organism.performStep()
-        self.graph.drawFrame(generationNumber)
 
     def determineSurvivors(self):
         return [org for org in self.organisms if self.survivalStrategy.survived(org)]
+
+    def determineOrganismColors(self):
+        redBenchmark = self.grid.organisms[random.randint(0, len(self.grid.organisms) - 1)]
+        greenBenchmark = redBenchmark
+        blueBenchmark = redBenchmark
+
+        for org in self.grid.organisms:
+            similarity = genome_similarity(redBenchmark.brain.genome, org.brain.genome)
+            org.color.red = math.floor(similarity * 255)
+
+            if org.color.red < greenBenchmark.color.red:
+                greenBenchmark = org
+        
+        for org in self.grid.organisms:
+            similarity = genome_similarity(greenBenchmark.brain.genome, org.brain.genome)
+            org.color.green = math.floor(similarity * 255)
+
+            if org.color.red + org.color.green < blueBenchmark.color.red + blueBenchmark.color.green:
+                blueBenchmark = org
+            
+        for org in self.grid.organisms:
+            similarity = genome_similarity(blueBenchmark.brain.genome, org.brain.genome)
+            org.color.blue = math.floor(similarity * 255)

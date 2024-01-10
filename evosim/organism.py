@@ -5,6 +5,7 @@ from .genome import Genome
 from .grid import Coord, Grid
 from .node import SenseTypes, ActionTypes
 
+import random
 
 class OrganismColor:
     def __init__(self):
@@ -20,6 +21,8 @@ class Organism:
     def __init__(self, grid: Grid, genome: Genome):
         self.brain = Brain(genome)
         self.loc = Coord(0, 0)
+        self.lastMove = ActionTypes.MOVE_NEG_X
+        
         self.grid = grid
         self.color = OrganismColor()
 
@@ -57,6 +60,22 @@ class Organism:
 
         if senseId == SenseTypes.DISTANCE_FROM_NEAREST_Y_EDGE:
             return min(self.loc.y, self.grid.height - self.loc.y) / (self.grid.height / 2)
+        
+        if senseId == SenseTypes.DISTANCE_FROM_FORWARD_EDGE:
+            if self.lastMove == ActionTypes.MOVE_NEG_X:
+                return self.loc.x
+            if self.lastMove == ActionTypes.MOVE_POS_X:
+                return self.grid.width - self.loc.x
+            if self.lastMove == ActionTypes.MOVE_NEG_Y:
+                return self.loc.y
+            return self.grid.height - self.loc.y
+        
+        if senseId == SenseTypes.POPULATION_CLOSE:
+            return self.grid.getDensityWithinDistance(self.loc, 5)
+        
+        if senseId == SenseTypes.POPULATION_FORWARD:
+            return self.grid.getDensityAlongAxisFromPoint(self.loc, self.lastMove)
+
  
     def executeActions(self, actionIds: List[Action]):
         moveActions = [action for action in actionIds if self.actionIsMoveAction(action)]
@@ -67,20 +86,40 @@ class Organism:
     # (as long as that location is in bounds and unoccupied)
     def executeMoveActions(self, actions: List[Action]):
         proposedMoveDir = Coord(0, 0)
+
+        # if we need to take a random move then generate one of the other move actions and add it to the list
+        randomMove = [action for action in actions if action.id == ActionTypes.MOVE_RANDOM]
+        if len(randomMove) == 1:
+            actions.append(Action(random.randint(0, 3), 0))
+
+        # if we need to take a forward move then generate a move action based on whatever the organism did last
+        forwardMove = [action for action in actions if action.id == ActionTypes.MOVE_FORWARD]
+        if len(forwardMove) == 1:
+            actions.append(Action(self.lastMove, 0))
+
         for action in actions:
             if action.id == ActionTypes.MOVE_POS_X:
                 proposedMoveDir.x += 1
+                self.lastMove = action.id
+
             elif action.id == ActionTypes.MOVE_NEG_X:
                 proposedMoveDir.x -= 1
+                self.lastMove = action.id
+
             elif action.id == ActionTypes.MOVE_POS_Y:
                 proposedMoveDir.y += 1
+                self.lastMove = action.id
+
             elif action.id == ActionTypes.MOVE_NEG_Y:
                 proposedMoveDir.y -= 1
+                self.lastMove = action.id
         
         proposedMove = self.loc + proposedMoveDir
         if self.grid.locIsValidForMove(proposedMove):
             self.loc = proposedMove
 
+
     def actionIsMoveAction(self, action: Action) -> bool:
         return action.id == ActionTypes.MOVE_NEG_X or action.id == ActionTypes.MOVE_NEG_Y \
-            or action.id == ActionTypes.MOVE_POS_X or action.id == ActionTypes.MOVE_POS_Y
+            or action.id == ActionTypes.MOVE_POS_X or action.id == ActionTypes.MOVE_POS_Y \
+            or action.id == ActionTypes.MOVE_RANDOM or action.id == ActionTypes.MOVE_FORWARD

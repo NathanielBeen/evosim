@@ -1,6 +1,6 @@
 import random
-from .runConfig import MUTATE_CHANCE, NUM_GENES, NUM_SENSE, NUM_INTERNAL, NUM_ACTIONS
-from .node import NodeType
+from .runConfig import MUTATE_CHANCE, NUM_GENES, NUM_INTERNAL
+from .node import NodeType, ActionTypes, SenseTypes
 
 class Gene:
     # we convert a "code" of 24 bits into a set of integers that will determine the type
@@ -30,11 +30,11 @@ class Gene:
 
     def setInputId(self):
         codeInputId = int(self.code[1:7], 2)
-        self.inputId = codeInputId % NUM_SENSE if self.inputType == NodeType.SENSE else codeInputId % NUM_INTERNAL
+        self.inputId = codeInputId % SenseTypes.count() if self.inputType == NodeType.SENSE else codeInputId % NUM_INTERNAL
     
     def setOutputId(self):
         codeOutputId = int(self.code[9:15], 2)
-        self.outputId = codeOutputId % NUM_INTERNAL if self.outputType == NodeType.INNER else codeOutputId % NUM_ACTIONS
+        self.outputId = codeOutputId % NUM_INTERNAL if self.outputType == NodeType.INNER else codeOutputId % ActionTypes.count()
 
 
     # for the first generation there are no parents, so we must generate a random bit string

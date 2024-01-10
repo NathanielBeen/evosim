@@ -4,12 +4,25 @@ class SenseTypes:
     DISTANCE_FROM_NEAREST_EDGE = 0
     DISTANCE_FROM_NEAREST_X_EDGE = 1
     DISTANCE_FROM_NEAREST_Y_EDGE = 2
+    DISTANCE_FROM_FORWARD_EDGE = 3
+    POPULATION_CLOSE = 4
+    POPULATION_FORWARD = 5
+
+    @staticmethod
+    def count():
+        return 6
 
 class ActionTypes:
     MOVE_POS_X = 0
     MOVE_NEG_X = 1
     MOVE_POS_Y = 2
     MOVE_NEG_Y = 3
+    MOVE_FORWARD = 4
+    MOVE_RANDOM = 5
+
+    @staticmethod
+    def count():
+        return 6
 
 class NodeType:
     SENSE = 0
@@ -51,6 +64,12 @@ class Node:
                 return 'dXE'
             if self.id == SenseTypes.DISTANCE_FROM_NEAREST_Y_EDGE:
                 return 'dYE'
+            if self.id == SenseTypes.DISTANCE_FROM_FORWARD_EDGE:
+                return 'dF'
+            if self.id == SenseTypes.POPULATION_CLOSE:
+                return 'pC'
+            if self.id == SenseTypes.POPULATION_FORWARD:
+                return 'pF'
         if self.type == NodeType.ACTION:
             if self.id == ActionTypes.MOVE_NEG_X:
                 return 'm-X'
@@ -60,6 +79,10 @@ class Node:
                 return 'm-Y'
             if self.id == ActionTypes.MOVE_POS_Y:
                 return 'm+Y'
+            if self.id == ActionTypes.MOVE_RANDOM:
+                return 'mR'
+            if self.id == ActionTypes.MOVE_FORWARD:
+                return 'mF'
         return str(self.id)
     
     def color(self):
