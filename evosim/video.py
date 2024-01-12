@@ -44,9 +44,10 @@ class Video:
         self.numImages += 1
 
     def saveVideo(self, genNumber):
-        videoName = f"{ASSET_FOLDER}/output_{genNumber}.avi"
+        videoName = f"{ASSET_FOLDER}/output_{genNumber}.mp4"
 
-        video = cv2.VideoWriter(videoName, 0, 10, (self.grid.width * IMAGE_SCALING, self.grid.height * IMAGE_SCALING))
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        video = cv2.VideoWriter(videoName, fourcc, 10, (self.grid.width * IMAGE_SCALING, self.grid.height * IMAGE_SCALING))
 
         imagePaths = []
         for img in os.listdir(ASSET_FOLDER):

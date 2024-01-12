@@ -1,6 +1,7 @@
 from typing import List
 import random
 import math
+from datetime import datetime
 
 from .runConfig import GRID_HEIGHT, GRID_WIDTH, NUM_ORGANISMS, NUM_STEPS_PER_GENERATION, NUM_GENERATIONS
 from .grid import Grid, Coord
@@ -18,6 +19,7 @@ class Simulation:
         self.organisms: List[Organism] = []
 
     def runSimulation(self):
+        start = datetime.now()
         for gen in range(NUM_GENERATIONS):
             self.createGeneration(gen)
 
@@ -37,6 +39,10 @@ class Simulation:
                 drawGraph(self.organisms, gen)
 
             self.organisms = self.determineSurvivors()
+            print(f'Number of survivors {len(self.organisms)}')
+        end = datetime.now()
+        print(f'Total time {end - start}')
+        
     
     def willRecordGeneration(self, genNumber):
         return genNumber == NUM_GENERATIONS - 1 or genNumber % 100 == 0
@@ -56,7 +62,6 @@ class Simulation:
                 newOrganisms.append(Organism.gen_from_parents(self.grid, parent, parent2))
         
         self.organisms = newOrganisms
-        self.grid.organisms = newOrganisms
 
         usedLocations = set()
         for organism in self.organisms:
@@ -78,6 +83,8 @@ class Simulation:
             
             organism.loc = proposedLoc
             usedLocations.add(proposedLoc)
+        
+        self.grid.initGeneration(newOrganisms)
 
     def determineSurvivors(self):
         return [org for org in self.organisms if self.survivalStrategy.survived(org)]

@@ -74,7 +74,7 @@ class Organism:
             return self.grid.getDensityWithinDistance(self.loc, 5)
         
         if senseId == SenseTypes.POPULATION_FORWARD:
-            return self.grid.getDensityAlongAxisFromPoint(self.loc, self.lastMove)
+            return self.grid.getDensityWithinDistanceDirected(self.loc, 5, self.lastMove)
 
  
     def executeActions(self, actionIds: List[Action]):
