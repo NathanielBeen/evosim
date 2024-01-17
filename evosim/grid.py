@@ -64,7 +64,10 @@ class Grid:
     def locIsValidForMove(self, loc: Coord) -> bool:
         if (loc.x < 0 or loc.x >= self.width or loc.y < 0 or loc.y >= self.height):
             return False
-        return not loc.mapString() in self.organismLocs
+        return not self.locOccupied(loc)
+
+    def locOccupied(self, loc: Coord) -> bool:
+        return loc.mapString() in self.organismLocs
     
     # given a location and a distance, return the desnity of organisms within that distance.
     def getDensityWithinDistance(self, loc: Coord, distance: int) -> bool:
@@ -74,7 +77,6 @@ class Grid:
     # return the density of organisms in a cone in front of an organism. The "front" is determined
     # by the last most that organism took.
     def getDensityWithinDistanceDirected(self, loc: Coord, distance: int, dir: ActionTypes):
-        start = datetime.now()
         check = lambda _: False
 
         if dir == ActionTypes.MOVE_NEG_X:

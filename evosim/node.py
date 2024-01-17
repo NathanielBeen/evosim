@@ -7,10 +7,12 @@ class SenseTypes:
     DISTANCE_FROM_FORWARD_EDGE = 3
     POPULATION_CLOSE = 4
     POPULATION_FORWARD = 5
+    FORWARD_OCCUPIED = 6
+    FORWARD_AVAILABLE = 7
 
     @staticmethod
     def count():
-        return 6
+        return 8
 
 class ActionTypes:
     MOVE_POS_X = 0
@@ -70,6 +72,10 @@ class Node:
                 return 'pC'
             if self.id == SenseTypes.POPULATION_FORWARD:
                 return 'pF'
+            if self.id == SenseTypes.FORWARD_OCCUPIED:
+                return 'fO'
+            if self.id == SenseTypes.FORWARD_AVAILABLE:
+                return 'fA'
         if self.type == NodeType.ACTION:
             if self.id == ActionTypes.MOVE_NEG_X:
                 return 'm-X'

@@ -9,7 +9,6 @@ from .organism import Organism
 from .genome import genome_similarity
 from .video import Video
 from .survivalCriteria import CornerSurvivalCriteria
-from .graph import drawGraph
 
 class Simulation:
     def __init__(self):
@@ -35,8 +34,7 @@ class Simulation:
                     self.video.drawFrame()
 
             if willRecord:
-                self.video.saveVideo(gen)
-                drawGraph(self.organisms, gen)
+                self.video.saveGenerationOutput(self.organisms, gen)
 
             self.organisms = self.determineSurvivors()
             print(f'Number of survivors {len(self.organisms)}')

@@ -2,7 +2,9 @@ from PIL import Image, ImageDraw
 import cv2
 import os
 import re
+import pygraphviz as pgv
 
+from .organism import Organism
 from .grid import Grid
 from .survivalCriteria import SurvivalCriteria
 from .runConfig import IMAGE_SCALING
@@ -14,18 +16,17 @@ class Video:
         self.grid = grid
         self.survivalCriteria = survivalCriteria
         self.numImages = 0
-        self.cleanImages()
-        self.cleanVideos()
+        self.cleanFolder()
 
-    def cleanImages(self):
+    def cleanIntermediaryImages(self):
         for f in os.listdir(ASSET_FOLDER):
             if f.startswith('image') and f.endswith(".png"):
                 os.remove(os.path.join(ASSET_FOLDER, f))
         self.numImages = 0
 
-    def cleanVideos(self):
+    def cleanFolder(self):
         for f in os.listdir(ASSET_FOLDER):
-            if f.endswith(".avi"):
+            if f.endswith(".mp4") or f.endswith(".png"):
                 os.remove(os.path.join(ASSET_FOLDER, f))
 
     def drawFrame(self):
@@ -42,6 +43,10 @@ class Video:
         imagePath = f"/home/nathaniel/Dev/evosim_assets/image_{self.numImages}.png"
         frame.save(imagePath)
         self.numImages += 1
+
+    def saveGenerationOutput(self, organisms: list[Organism], genNumber: int):
+        self.saveVideo(genNumber)
+        self.drawGraph(organisms, genNumber)
 
     def saveVideo(self, genNumber):
         videoName = f"{ASSET_FOLDER}/output_{genNumber}.mp4"
@@ -65,5 +70,27 @@ class Video:
         cv2.destroyAllWindows()
         video.release()
 
-        self.cleanImages()
+        self.cleanIntermediaryImages()
 
+    def drawGraph(self, organisms: list[Organism], genNumber: int):
+
+        # find the most average organism to graph (defined by having the highest average similarity)
+        averageOrg: Organism = None
+        highestSim = 0
+
+        for org in organisms:
+            similarity = org.color.red + org.color.green + org.color.blue
+            if similarity > highestSim:
+                averageOrg = org
+
+        graph = pgv.AGraph(strict=False, directed=True, rankdir="LR")
+
+        for node in [*averageOrg.brain.senseNodes, *averageOrg.brain.innerNodes, *averageOrg.brain.actionNodes]:
+            graph.add_node(node.name(), color=node.color())
+
+            for conn in node.connections:
+                    if conn.input == node:
+                        graph.add_edge(node.name(), conn.output.name(), penwidth=conn.width(), color=conn.color(), len=2)
+
+        graph.layout()
+        graph.draw(f"{ASSET_FOLDER}/graph_{genNumber}.png")

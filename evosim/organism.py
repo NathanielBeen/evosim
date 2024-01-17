@@ -75,6 +75,19 @@ class Organism:
         
         if senseId == SenseTypes.POPULATION_FORWARD:
             return self.grid.getDensityWithinDistanceDirected(self.loc, 5, self.lastMove)
+        
+        if senseId == SenseTypes.FORWARD_OCCUPIED or senseId == SenseTypes.FORWARD_AVAILABLE:
+            forwardLoc = Coord(self.loc.x, self.loc.y)
+            if self.lastMove == ActionTypes.MOVE_NEG_X:
+                forwardLoc.x -= 1
+            if self.lastMove == ActionTypes.MOVE_POS_X:
+                forwardLoc.x += 1
+            if self.lastMove == ActionTypes.MOVE_NEG_Y:
+                forwardLoc.y -= 1
+            if self.lastMove == ActionTypes.MOVE_POS_Y:
+                forwardLoc.y += 1
+            return self.grid.locOccupied(forwardLoc) if senseId == SenseTypes.FORWARD_OCCUPIED \
+                else self.grid.locIsValidForMove(forwardLoc)
 
  
     def executeActions(self, actionIds: List[Action]):
