@@ -9,10 +9,11 @@ class SenseTypes:
     POPULATION_FORWARD = 5
     FORWARD_OCCUPIED = 6
     FORWARD_AVAILABLE = 7
+    AGE = 8
 
     @staticmethod
     def count():
-        return 8
+        return 9
 
 class ActionTypes:
     MOVE_POS_X = 0
@@ -76,6 +77,8 @@ class Node:
                 return 'fO'
             if self.id == SenseTypes.FORWARD_AVAILABLE:
                 return 'fA'
+            if self.id == SenseTypes.AGE:
+                return 'A'
         if self.type == NodeType.ACTION:
             if self.id == ActionTypes.MOVE_NEG_X:
                 return 'm-X'

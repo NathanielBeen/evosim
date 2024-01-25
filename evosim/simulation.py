@@ -1,49 +1,39 @@
 from typing import List
 import random
-import math
 from datetime import datetime
 
 from .runConfig import GRID_HEIGHT, GRID_WIDTH, NUM_ORGANISMS, NUM_STEPS_PER_GENERATION, NUM_GENERATIONS
 from .grid import Grid, Coord
 from .organism import Organism
-from .genome import genome_similarity
-from .video import Video
+from .output import Output
 from .survivalCriteria import CornerSurvivalCriteria
 
 class Simulation:
     def __init__(self):
         self.grid = Grid(GRID_WIDTH, GRID_HEIGHT)
         self.survivalStrategy = CornerSurvivalCriteria(20)
-        self.video = Video(self.grid, self.survivalStrategy)
+        self.output = Output(self.grid, self.survivalStrategy)
         self.organisms: List[Organism] = []
 
     def runSimulation(self):
         start = datetime.now()
         for gen in range(NUM_GENERATIONS):
             self.createGeneration(gen)
-
-            willRecord = self.willRecordGeneration(gen)
-            if willRecord:
-                self.determineOrganismColors()
-                self.video.drawFrame()
+            self.output.stepComplete(gen)
 
             for _ in range(NUM_STEPS_PER_GENERATION):
                 for organism in self.organisms:
                     organism.performStep()
-                if willRecord:
-                    self.video.drawFrame()
+                self.output.stepComplete(gen)
 
-            if willRecord:
-                self.video.saveGenerationOutput(self.organisms, gen)
+            survivors = self.determineSurvivors()
+            self.output.generationComplete(self.organisms, len(survivors), gen)
 
-            self.organisms = self.determineSurvivors()
-            print(f'Number of survivors {len(self.organisms)}')
+            self.organisms = survivors
+
+        self.output.simulationComplete()
         end = datetime.now()
         print(f'Total time {end - start}')
-        
-    
-    def willRecordGeneration(self, genNumber):
-        return genNumber == NUM_GENERATIONS - 1 or genNumber % 100 == 0
     
     # creates a set of organsisms (either with random genes or based on parents)
     # and places then randomly in the grid
@@ -86,26 +76,3 @@ class Simulation:
 
     def determineSurvivors(self):
         return [org for org in self.organisms if self.survivalStrategy.survived(org)]
-
-    def determineOrganismColors(self):
-        redBenchmark = self.grid.organisms[random.randint(0, len(self.grid.organisms) - 1)]
-        greenBenchmark = redBenchmark
-        blueBenchmark = redBenchmark
-
-        for org in self.grid.organisms:
-            similarity = genome_similarity(redBenchmark.brain.genome, org.brain.genome)
-            org.color.red = math.floor(similarity * 255)
-
-            if org.color.red < greenBenchmark.color.red:
-                greenBenchmark = org
-        
-        for org in self.grid.organisms:
-            similarity = genome_similarity(greenBenchmark.brain.genome, org.brain.genome)
-            org.color.green = math.floor(similarity * 255)
-
-            if org.color.red + org.color.green < blueBenchmark.color.red + blueBenchmark.color.green:
-                blueBenchmark = org
-            
-        for org in self.grid.organisms:
-            similarity = genome_similarity(blueBenchmark.brain.genome, org.brain.genome)
-            org.color.blue = math.floor(similarity * 255)

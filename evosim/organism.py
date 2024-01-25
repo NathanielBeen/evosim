@@ -1,5 +1,6 @@
 from typing import List
 
+from .runConfig import NUM_STEPS_PER_GENERATION
 from .brain import Brain, Action
 from .genome import Genome
 from .grid import Coord, Grid
@@ -22,6 +23,7 @@ class Organism:
         self.brain = Brain(genome)
         self.loc = Coord(0, 0)
         self.lastMove = ActionTypes.MOVE_NEG_X
+        self.age = 0
         
         self.grid = grid
         self.color = OrganismColor()
@@ -39,6 +41,7 @@ class Organism:
     # perform one complete cycle: reset all the brain nodes, populate sense data, apply all
     # the node connections to generate actions, and execute those actions
     def performStep(self):
+        self.age += 1
         self.brain.clearNodes()
         for node in self.brain.senseNodes:
             node.value = self.getSenseValue(node.id)
@@ -88,7 +91,9 @@ class Organism:
                 forwardLoc.y += 1
             return self.grid.locOccupied(forwardLoc) if senseId == SenseTypes.FORWARD_OCCUPIED \
                 else self.grid.locIsValidForMove(forwardLoc)
-
+        
+        if senseId == SenseTypes.AGE:
+            return self.age / NUM_STEPS_PER_GENERATION
  
     def executeActions(self, actionIds: List[Action]):
         moveActions = [action for action in actionIds if self.actionIsMoveAction(action)]
@@ -126,10 +131,10 @@ class Organism:
             elif action.id == ActionTypes.MOVE_NEG_Y:
                 proposedMoveDir.y -= 1
                 self.lastMove = action.id
-        
+
         proposedMove = self.loc + proposedMoveDir
         if self.grid.locIsValidForMove(proposedMove):
-            self.loc = proposedMove
+            self.grid.updateLoc(self, proposedMove)
 
 
     def actionIsMoveAction(self, action: Action) -> bool:
