@@ -41,7 +41,7 @@ These are then fed forward to inner (or action) nodes, with the sense value bein
 
 Once all action likelihoods have been calculated, random values are generated to determine which will actually be carried out.
 
-At the beginning of each generation, individuals are placed randomly on a grid, and after 100 steps of movement (this can be configured in `runConfig.py`) a survival criteria is used to determine which individuals will get to pass on their genetic information to the next generation. Currently the implemented survival criteria are simple: one requires individuals be within a certain distance of a specific edge to survive and another requires individuals be within a certain distance of one of the corners to survive.
+At the beginning of each generation, individuals are placed randomly on a grid, and after 100 steps of movement (this can be configured in `config.py`) a survival criteria is used to determine which individuals will get to pass on their genetic information to the next generation. Currently the implemented survival criteria are simple: one requires individuals be within a certain distance of a specific edge to survive and another requires individuals be within a certain distance of one of the corners to survive.
 
 ## Getting Started
 
@@ -49,5 +49,5 @@ In order to run EvoSim you will need to have poetry installed on your local mach
 
 Note: currently the program will output result files to a hard-coded folder (`ASSET_FOLDER` in `video.py`), so you will need to alter said attribute to point to your desired output folder. This will be improved in future updates
 
-Additionally, parameters related to the simulation, such as the number of generations or how often to take snapshots, can be edited in `runConfig.py`
+Additionally, parameters related to the simulation, such as the number of generations or how often to take snapshots, can be edited in `config.py`
 

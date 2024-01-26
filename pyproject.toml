@@ -5,6 +5,9 @@ description = ""
 authors = ["Nathaniel Been"]
 readme = "README.md"
 
+[tool.poetry.scripts]
+evosim = "main:cli"
+
 [tool.poetry.dependencies]
 python = "^3.11"
 pillow = "^10.1.0"
@@ -12,6 +15,7 @@ opencv-python = "^4.8.1.78"
 numpy = "^1.26.2"
 pygraphviz = "^1.11"
 matplotlib = "^3.8.2"
+click = "^8.1.7"
 
 
 [build-system]

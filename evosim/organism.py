@@ -1,6 +1,6 @@
 from typing import List
 
-from .runConfig import NUM_STEPS_PER_GENERATION
+from config import Config
 from .brain import Brain, Action
 from .genome import Genome
 from .grid import Coord, Grid
@@ -93,7 +93,7 @@ class Organism:
                 else self.grid.locIsValidForMove(forwardLoc)
         
         if senseId == SenseTypes.AGE:
-            return self.age / NUM_STEPS_PER_GENERATION
+            return self.age / Config.get(Config.STEPS)
  
     def executeActions(self, actionIds: List[Action]):
         moveActions = [action for action in actionIds if self.actionIsMoveAction(action)]

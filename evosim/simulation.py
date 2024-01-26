@@ -2,26 +2,26 @@ from typing import List
 import random
 from datetime import datetime
 
-from .runConfig import GRID_HEIGHT, GRID_WIDTH, NUM_ORGANISMS, NUM_STEPS_PER_GENERATION, NUM_GENERATIONS
+from config import Config
 from .grid import Grid, Coord
 from .organism import Organism
 from .output import Output
 from .survivalCriteria import CornerSurvivalCriteria
 
 class Simulation:
-    def __init__(self):
-        self.grid = Grid(GRID_WIDTH, GRID_HEIGHT)
+    def __init__(self, outputFolder):
+        self.grid = Grid(Config.get(Config.GRID_WIDTH), Config.get(Config.GRID_HEIGHT))
         self.survivalStrategy = CornerSurvivalCriteria(20)
-        self.output = Output(self.grid, self.survivalStrategy)
+        self.output = Output(outputFolder, self.grid, self.survivalStrategy)
         self.organisms: List[Organism] = []
 
     def runSimulation(self):
         start = datetime.now()
-        for gen in range(NUM_GENERATIONS):
+        for gen in range(Config.get(Config.GENERATIONS)):
             self.createGeneration(gen)
             self.output.stepComplete(gen)
 
-            for _ in range(NUM_STEPS_PER_GENERATION):
+            for _ in range(Config.get(Config.STEPS)):
                 for organism in self.organisms:
                     organism.performStep()
                 self.output.stepComplete(gen)
@@ -40,9 +40,9 @@ class Simulation:
     def createGeneration(self, generationNumber):
         newOrganisms: List[Organism] = []
         if generationNumber == 0:
-            newOrganisms = [Organism.gen_random(self.grid) for _ in range(NUM_ORGANISMS)]
+            newOrganisms = [Organism.gen_random(self.grid) for _ in range(Config.get(Config.ORGANSISMS))]
         else:
-            for _ in range(NUM_ORGANISMS):
+            for _ in range(Config.get(Config.ORGANSISMS)):
                 # select random parents for each organism. There's opportunity here for a more
                 # sophisticated "mating" system that uses proximity or score or something instead
                 parent = self.organisms[random.randint(0, len(self.organisms) - 1)]

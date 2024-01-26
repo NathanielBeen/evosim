@@ -1,5 +1,5 @@
 import random
-from .runConfig import MUTATE_CHANCE, NUM_GENES, NUM_INTERNAL
+from config import Config
 from .node import NodeType, ActionTypes, SenseTypes
 
 class Gene:
@@ -30,11 +30,11 @@ class Gene:
 
     def setInputId(self):
         codeInputId = int(self.code[1:7], 2)
-        self.inputId = codeInputId % SenseTypes.count() if self.inputType == NodeType.SENSE else codeInputId % NUM_INTERNAL
+        self.inputId = codeInputId % SenseTypes.count() if self.inputType == NodeType.SENSE else codeInputId % Config.get(Config.NUM_INTERNAL_NODES)
     
     def setOutputId(self):
         codeOutputId = int(self.code[9:15], 2)
-        self.outputId = codeOutputId % NUM_INTERNAL if self.outputType == NodeType.INNER else codeOutputId % ActionTypes.count()
+        self.outputId = codeOutputId % Config.get(Config.NUM_INTERNAL_NODES) if self.outputType == NodeType.INNER else codeOutputId % ActionTypes.count()
 
 
     # for the first generation there are no parents, so we must generate a random bit string
@@ -64,12 +64,11 @@ class Gene:
     # a mutation by generating a random number from 0 to 1 and seeing if it is less than the mutation chance
     @staticmethod
     def mutateCode(code: str):
-        if random.random() < MUTATE_CHANCE:
+        if random.random() < Config.get(Config.MUTATE_CHANCE):
             bitToFlip = random.randint(0, len(code) - 1)
             code = code[:bitToFlip] + ("1" if code[bitToFlip] == "0" else "0") + code[bitToFlip+1:]
 
         return code
-
 
 
 class Genome:
@@ -78,7 +77,7 @@ class Genome:
 
     @staticmethod
     def gen_random():    
-        return Genome([Gene.gen_random() for _ in range(NUM_GENES)])
+        return Genome([Gene.gen_random() for _ in range(Config.get(Config.GENES))])
 
     @staticmethod
     def gen_from_parents(parentGenome: 'Genome', parent2Genome: 'Genome'):
