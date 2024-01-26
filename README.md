@@ -43,7 +43,7 @@ Once all action likelihoods have been calculated, random values are generated to
 
 At the beginning of each generation, individuals are placed randomly on a grid, and after 100 steps of movement (this can be configured in `config.py`) a survival criteria is used to determine which individuals will get to pass on their genetic information to the next generation. Currently the implemented survival criteria are simple: one requires individuals be within a certain distance of a specific edge to survive and another requires individuals be within a certain distance of one of the corners to survive.
 
-At the end of the simulation, a number of graphs and charts will be generated to provide more information about the results of the simulation. This includes a video of the generation and a graph depicting the brain of the average individual within that generation, which are created every 100th generation. Additionally, it will create a graph displaying the number of survivors and the genetic similarity (obtained through a random sampling of individual organisms) of each generation at the very end.
+At the end of the simulation, a number of graphs and charts will be generated to provide more information about the results of the simulation. This includes a video of the generation and a graph depicting the brain of the average individual within that generation, which are created every 100th generation (and can be seen above). Additionally, it will create a graph displaying the number of survivors and the genetic similarity (obtained through a random sampling of individual organisms) of each generation at the very end.
 
 ![evosim_survivor_graph](https://github.com/NathanielBeen/evosim/assets/39103518/813ac671-b474-473c-aa26-1efb2414c8b2)
 
