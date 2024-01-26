@@ -43,11 +43,15 @@ Once all action likelihoods have been calculated, random values are generated to
 
 At the beginning of each generation, individuals are placed randomly on a grid, and after 100 steps of movement (this can be configured in `config.py`) a survival criteria is used to determine which individuals will get to pass on their genetic information to the next generation. Currently the implemented survival criteria are simple: one requires individuals be within a certain distance of a specific edge to survive and another requires individuals be within a certain distance of one of the corners to survive.
 
+At the end of the simulation, a number of graphs and charts will be generated to provide more information about the results of the simulation. This includes a video of the generation and a graph depicting the brain of the average individual within that generation, which are created every 100th generation. Additionally, it will create a graph displaying the number of survivors and the genetic similarity (obtained through a random sampling of individual organisms) of each generation at the very end.
+
+![evosim_survivor_graph](https://github.com/NathanielBeen/evosim/assets/39103518/813ac671-b474-473c-aa26-1efb2414c8b2)
+
 ## Getting Started
 
-In order to run EvoSim you will need to have poetry installed on your local machine. Once you have downloaded this repo run `poetry install`. Once you have done that, the program can be run with `poetry run python main.py`
+In order to run EvoSim you will need to have poetry installed on your local machine. Once you have downloaded this repo run `poetry install`. Once you have done that, the program can be run with `poetry run evosim [PATH_TO_OUTPUT_FOLDER]`. The output folder is where all generated graphs and videos will be saved to.
 
-Note: currently the program will output result files to a hard-coded folder (`ASSET_FOLDER` in `video.py`), so you will need to alter said attribute to point to your desired output folder. This will be improved in future updates
+Important: evosim will clear the given folder of .png and .mp4 files before each run to ensure that only the results of that run are saved. As such I highly recommend you create a completely new folder for this program instead of reusing an existing one.
 
-Additionally, parameters related to the simulation, such as the number of generations or how often to take snapshots, can be edited in `config.py`
+A number of parameters can be passed into the command line to change the number of organisms per generation, the number of generations, etc. All of these flags can be found by running `poetry run evosim --help`. These configuration parameters (and other, lesser-used ones) can also be changed in the `config.py` file in the root directory. Note that a parameter passed in with a flag will always override the one found in the `config.py`.
 
