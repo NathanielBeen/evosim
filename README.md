@@ -7,9 +7,21 @@ I got the idea for this project from https://github.com/davidrmiller/biosim4, an
 
 ## What it does
 
-EvoSim explores the basic principles of evolution by simulating generations of individual organisms and seeing how many meet the given survival criteria. In summary, each generation is made up of a number of individuals, each of which has a "genome" consisting of a certain number of genes. At the start of the generation these genes are converted into connections in a simple neural network, which will gather data from the environment via senses and then calculate actions to perform. The simulation is run for a certain number of steps, with each individual taking actions based upon the calculated values in its own NN. At the end of the generation, survivors are determined based upon some survival criteria (get within 5 units of the left wall, for example) and a new generation is created based upon the genomes of those survivors. Along the way the program will generate videos of certain generations (which look like the image linked above), and a graph showing the average genome of an individual within the generation.
+EvoSim explores the basic principles of evolution by simulating generations of individual organisms and seeing how many meet the given survival criteria. The simulation is founded upon a series of "generations", where individual organisms will be created and navigate their world in an attempt to survive and pass on their genes to the next generation. Each generation consists of a set number of "steps", and during each step the organism will receive a variety of data through its "senses" and will determine what actions to take via a simple Neural Network brain, consisting of a number of connections between nodes. These connections are encoded by the organism's "genome", a set of binary strings that can be passed to its offspring, thus allowing the whole population to gradually adapt to the environment and survive at greater and greater rates.
 
 ## How it works
+
+### The Arena
+
+EvoSim places all organisms into an "arena", a grid of spaces that they must navigate in order to survive. The grid is a specified height and width (configurable by changing the appropriate values in `config.py`) and has a certain area that is designated the "survival zone" (colored yellow in all screenshots). If an organism reaches this zone then they are considered a survivor and are eligible to pass on their genes to the next generation. There are currently two possible configurations for survival
+ - Side: get within X spaces of a specified side of the grid
+ - Corner: get within X spaces of one of the four corners of the grid (pictured above)
+
+In addition to the survival criteria, barriers can be added to impede the movement of organisms. These are rectangles of blocked off spaces configured in the `OBSTACLES` parameter in `config.py`. For example, the following simulation placed a barrier directly in front of the survival area, requiring organisms to move around it to survive
+
+![evosim_barriers](https://github.com/NathanielBeen/evosim/assets/39103518/7ee2a978-7dbf-489e-8fbc-2db44802f146)
+
+### Genomes and Brains
 
 The genome of each individual contains a number of genes, each of which is a string of 24 binary bits. For the first generation of individuals these genomes are generated randomly, but for all subsequent generations two surviving genomes are selected and spliced together (with a chance of a random mutation - simulated by flipping a random bit in the gene) to form new genomes.
 
@@ -41,11 +53,13 @@ These are then fed forward to inner (or action) nodes, with the sense value bein
 
 Once all action likelihoods have been calculated, random values are generated to determine which will actually be carried out.
 
-At the beginning of each generation, individuals are placed randomly on a grid, and after 100 steps of movement (this can be configured in `config.py`) a survival criteria is used to determine which individuals will get to pass on their genetic information to the next generation. Currently the implemented survival criteria are simple: one requires individuals be within a certain distance of a specific edge to survive and another requires individuals be within a certain distance of one of the corners to survive.
+### Output
 
-At the end of the simulation, a number of graphs and charts will be generated to provide more information about the results of the simulation. This includes a video of the generation and a graph depicting the brain of the average individual within that generation, which are created every 100th generation (and can be seen above). Additionally, it will create a graph displaying the number of survivors and the genetic similarity (obtained through a random sampling of individual organisms) of each generation at the very end.
+At the end of the simulation, a number of graphs and charts will be generated to provide more information about the results of the simulation. The first is a graph showing the genetic similarity and # of survivors in each generation
 
 ![evosim_survivor_graph](https://github.com/NathanielBeen/evosim/assets/39103518/813ac671-b474-473c-aa26-1efb2414c8b2)
+
+Additionally, during specific generations additional output will be generated (currently configured to every 300 generations, including the first and last ones). The first of these outputs is a video showing what happened during each step of the generation. All of the images of the arena that you have seen here are screenshots of these videos. Additionally, the simulation will output a directed graph of the "most average" brain in the generation to get an idea of how they are solving the problem.
 
 ## Getting Started
 
