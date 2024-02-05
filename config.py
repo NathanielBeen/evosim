@@ -9,19 +9,26 @@ class Config:
 
   GRID_WIDTH = "gridWidth"
   GRID_HEIGHT = "gridHeight"
+  OBSTACLES = "obstacles"
 
   IMAGE_SCALING = "imageScaling"
 
+  SENSE_DISTANCE = "senseDistance"
+
   configValues = {
-    GENERATIONS: 1000,
-    STEPS: 100,
+    GENERATIONS: 3000,
+    STEPS: 150,
     ORGANSISMS: 100,
     GENES: 10,
     MUTATE_CHANCE: .05,
     NUM_INTERNAL_NODES: 4,
-    GRID_WIDTH: 128,
-    GRID_HEIGHT: 128,
-    IMAGE_SCALING: 4
+    GRID_WIDTH: 140,
+    GRID_HEIGHT: 140,
+    IMAGE_SCALING: 4,
+    OBSTACLES: [
+      [120, 130, 20, 120] # [left, right top, bottom]
+    ],
+    SENSE_DISTANCE: 5
   }
 
   @staticmethod

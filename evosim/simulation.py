@@ -3,15 +3,16 @@ import random
 from datetime import datetime
 
 from config import Config
-from .grid import Grid, Coord
+from .grid import Grid
+from .coord import Coord
 from .organism import Organism
 from .output import Output
-from .survivalCriteria import CornerSurvivalCriteria
+from .survivalCriteria import SideSurvialCriteria, SideSurvivalType
 
 class Simulation:
     def __init__(self, outputFolder):
-        self.grid = Grid(Config.get(Config.GRID_WIDTH), Config.get(Config.GRID_HEIGHT))
-        self.survivalStrategy = CornerSurvivalCriteria(20)
+        self.grid = Grid(Config.get(Config.GRID_WIDTH), Config.get(Config.GRID_HEIGHT), Config.get(Config.OBSTACLES))
+        self.survivalStrategy = SideSurvialCriteria(SideSurvivalType.RIGHT, 10)
         self.output = Output(outputFolder, self.grid, self.survivalStrategy)
         self.organisms: List[Organism] = []
 
@@ -19,15 +20,15 @@ class Simulation:
         start = datetime.now()
         for gen in range(Config.get(Config.GENERATIONS)):
             self.createGeneration(gen)
-            self.output.stepComplete(gen)
+            self.output.generationStarted(self.organisms, gen)
 
             for _ in range(Config.get(Config.STEPS)):
                 for organism in self.organisms:
                     organism.performStep()
-                self.output.stepComplete(gen)
+                self.output.stepComplete()
 
             survivors = self.determineSurvivors()
-            self.output.generationComplete(self.organisms, len(survivors), gen)
+            self.output.generationComplete(len(survivors))
 
             self.organisms = survivors
 
@@ -50,29 +51,8 @@ class Simulation:
                 newOrganisms.append(Organism.gen_from_parents(self.grid, parent, parent2))
         
         self.organisms = newOrganisms
-
-        usedLocations = set()
-        for organism in self.organisms:
-            proposedLoc = Coord(
-                random.randint(0, self.grid.width - 1), 
-                random.randint(0, self.grid.height - 1)
-            )
-            attempts = 0
-            # generate locations randomly until we come across one that is not occupied
-            # it is possible that this could become extremely expensive or even loop forever,
-            # but as long as there is a relatively low population density we shouldn't expect
-            # many repeat locations
-            while proposedLoc in usedLocations:
-                attempts += 1
-                proposedLoc = Coord(
-                    random.randint(0, self.grid.width - 1), 
-                    random.randint(0, self.grid.height - 1)
-                )
-            
-            organism.loc = proposedLoc
-            usedLocations.add(proposedLoc)
-        
-        self.grid.initGeneration(newOrganisms)
+        # the grid will place new organisms in a random starting location
+        self.grid.initGeneration(self.organisms)
 
     def determineSurvivors(self):
         return [org for org in self.organisms if self.survivalStrategy.survived(org)]

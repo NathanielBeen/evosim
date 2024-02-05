@@ -19,6 +19,9 @@ class Output:
         self.outputFolder = outputFolder
         self.cleanFolder()
 
+        self.organisms: list[Organism] = []
+        self.genNumber: int = 0
+
         self.video = OutputVideo(outputFolder, grid, survivalCriteria)
         self.graph = OutputGraph(outputFolder)
         self.stats = OutputStats(outputFolder)
@@ -28,20 +31,26 @@ class Output:
             if f.endswith(".mp4") or f.endswith(".png"):
                 os.remove(os.path.join(self.outputFolder, f))
 
-    def willRecordGeneration(self, genNumber: int) -> bool:
-        return genNumber == Config.get(Config.GENERATIONS) - 1 or genNumber % 100 == 0
-    
-    def stepComplete(self, genNumber: int):
-        if self.willRecordGeneration(genNumber):
+    def generationStarted(self, organisms: list[Organism], genNumber: int):
+        self.organisms = organisms
+        self.genNumber = genNumber
+        if self.willRecordGeneration():
+            self.determineOrganismColors(organisms)
             self.video.drawFrame()
 
-    def generationComplete(self, organisms: list[Organism], survivors: int, genNumber: int):
-        self.stats.addStats(organisms, survivors)
+    def willRecordGeneration(self) -> bool:
+        return self.genNumber == Config.get(Config.GENERATIONS) - 1 or self.genNumber % 300 == 0
+    
+    def stepComplete(self):
+        if self.willRecordGeneration():
+            self.video.drawFrame()
 
-        if self.willRecordGeneration(genNumber):
-            self.determineOrganismColors(organisms)
-            self.video.saveVideo(genNumber)
-            self.graph.drawGraph(organisms, genNumber)
+    def generationComplete(self, survivors: int):
+        self.stats.addStats(self.organisms, survivors)
+
+        if self.willRecordGeneration():
+            self.video.saveVideo(self.genNumber)
+            self.graph.drawGraph(self.organisms, self.genNumber)
 
     def simulationComplete(self):
         self.stats.drawGraph()
@@ -83,6 +92,8 @@ class OutputVideo:
         context = ImageDraw.Draw(frame)
 
         self.survivalCriteria.draw(context)
+        for obs in self.grid.obstacles:
+            obs.draw(context)
 
         for org in self.grid.organisms:
             context.rectangle((
