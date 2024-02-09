@@ -61,7 +61,7 @@ class Grid:
         mapStr = loc.mapString()
         return not mapStr in self.organismLocs and not mapStr in self.blockedLocs
     
-    # given a location and a distance, return the desnity of organisms within that distance.
+    # given a location and a distance, return the density of organisms within that distance.
     def getDensityWithinDistance(self, loc: Coord, distance: int) -> bool:
         condition = lambda org: abs(loc.x - org.loc.x) + abs(loc.y - org.loc.y) <= distance
         return self.getDensity(condition, 100)

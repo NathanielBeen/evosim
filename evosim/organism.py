@@ -6,38 +6,31 @@ from .genome import Genome
 from .grid import Grid
 from .coord import Coord
 from .node import SenseTypes, ActionTypes
+from .genome_similarity import NFactorGeneticSimilary
 
 import random
 
-class OrganismColor:
-    def __init__(self):
-        self.red = 0
-        self.green = 0
-        self.blue = 0
-    
-    def hex(self):
-        return '#{:02x}{:02x}{:02x}'.format(self.red, self.green, self.blue)
-
-
 class Organism:
-    def __init__(self, grid: Grid, genome: Genome):
+    def __init__(self, id: int, grid: Grid, genome: Genome):
+        self.id = id
+
         self.brain = Brain(genome)
         self.loc = Coord(0, 0)
         self.lastMove = ActionTypes.MOVE_NEG_X
         self.age = 0
         
         self.grid = grid
-        self.color = OrganismColor()
+        self.similarity: NFactorGeneticSimilary = None
 
     @staticmethod
-    def gen_random(grid: Grid):
+    def gen_random(id: int, grid: Grid):
         genome = Genome.gen_random()
-        return Organism(grid, genome)
+        return Organism(id, grid, genome)
     
     @staticmethod
-    def gen_from_parents(grid: Grid, parent: 'Organism', parent2: 'Organism'):
+    def gen_from_parents(id: int, grid: Grid, parent: 'Organism', parent2: 'Organism'):
         genome = Genome.gen_from_parents(parent.brain.genome, parent2.brain.genome)
-        return Organism(grid, genome)
+        return Organism(id, grid, genome)
     
     # perform one complete cycle: reset all the brain nodes, populate sense data, apply all
     # the node connections to generate actions, and execute those actions

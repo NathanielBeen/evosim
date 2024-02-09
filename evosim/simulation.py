@@ -4,10 +4,10 @@ from datetime import datetime
 
 from config import Config
 from .grid import Grid
-from .coord import Coord
 from .organism import Organism
 from .output import Output
 from .survivalCriteria import SideSurvialCriteria, SideSurvivalType
+from .genome_similarity import calcGenerationSimiarity
 
 class Simulation:
     def __init__(self, outputFolder):
@@ -41,18 +41,61 @@ class Simulation:
     def createGeneration(self, generationNumber):
         newOrganisms: List[Organism] = []
         if generationNumber == 0:
-            newOrganisms = [Organism.gen_random(self.grid) for _ in range(Config.get(Config.ORGANSISMS))]
+            newOrganisms = [Organism.gen_random(id, self.grid) for id in range(Config.get(Config.ORGANSISMS))]
+        elif Config.get(Config.MATING_STRATEGY) == 0:
+            newOrganisms = self.randomMating(self.organisms)
         else:
-            for _ in range(Config.get(Config.ORGANSISMS)):
-                # select random parents for each organism. There's opportunity here for a more
-                # sophisticated "mating" system that uses proximity or score or something instead
-                parent = self.organisms[random.randint(0, len(self.organisms) - 1)]
-                parent2 = self.organisms[random.randint(0, len(self.organisms) - 1)]
-                newOrganisms.append(Organism.gen_from_parents(self.grid, parent, parent2))
+            newOrganisms = self.geneticSimilarityMating(self.organisms)
         
+        calcGenerationSimiarity(newOrganisms, 3)
         self.organisms = newOrganisms
         # the grid will place new organisms in a random starting location
         self.grid.initGeneration(self.organisms)
+
+    # generate a new set of organisms by randomly selecting survivors and splicing their genomes together
+    def randomMating(self, survivors: list[Organism]) -> list[Organism]:
+        newOrganisms = []
+        for id in range(Config.get(Config.ORGANSISMS)):
+                parent = survivors[random.randint(0, len(survivors) - 1)]
+                parent2 = survivors[random.randint(0, len(survivors) - 1)]
+                newOrganisms.append(Organism.gen_from_parents(id, self.grid, parent, parent2))
+        return newOrganisms
+
+    # generate a new set of organisms by matching survivors that are genetically similar to each other
+    # and then splicing their genomes together
+    def geneticSimilarityMating(self, survivors: list[Organism]) -> list[Organism]:
+        pairedSurvivors = {}
+        survivorPairs = []
+
+        for survivor in survivors:
+            # we will only end up going through around half of the survivors, as the other half
+            # will be matched, so exit early if we have found all the pairs
+            if len(survivorPairs) * 2 >= len(survivors) - 1:
+                break
+
+            if not survivor.id in pairedSurvivors:
+                match = None
+                matchDifference = None
+
+                # find the organism that has not already been matched that is most genetically
+                # similar to the current survivor
+                for potentialMatch in survivors:
+                    if not potentialMatch.id in pairedSurvivors and potentialMatch != survivor:
+                        difference = survivor.similarity.getWeightedDifference(potentialMatch.similarity)
+                        if not matchDifference or difference < matchDifference:
+                            match = potentialMatch
+                            matchDifference = difference
+
+                pairedSurvivors[survivor.id] = True
+                pairedSurvivors[match.id] = True
+                survivorPairs.append([survivor, match])
+        
+        newOrganisms = []
+        for id in range(Config.get(Config.ORGANSISMS)):
+            index = id % len(survivorPairs)
+            newOrganisms.append(Organism.gen_from_parents(id, self.grid, survivorPairs[index][0], survivorPairs[index][1]))
+                
+        return newOrganisms
 
     def determineSurvivors(self):
         return [org for org in self.organisms if self.survivalStrategy.survived(org)]

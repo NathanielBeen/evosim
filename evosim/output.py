@@ -3,7 +3,6 @@ import cv2
 import os
 import re
 import random
-import math
 import pygraphviz as pgv
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,7 +10,7 @@ import numpy as np
 from .organism import Organism
 from .grid import Grid
 from .survivalCriteria import SurvivalCriteria
-from .genome import genome_similarity
+from .genome_similarity import genome_similarity
 from config import Config
 
 class Output:
@@ -35,7 +34,6 @@ class Output:
         self.organisms = organisms
         self.genNumber = genNumber
         if self.willRecordGeneration():
-            self.determineOrganismColors(organisms)
             self.video.drawFrame()
 
     def willRecordGeneration(self) -> bool:
@@ -55,29 +53,6 @@ class Output:
     def simulationComplete(self):
         self.stats.drawGraph()
 
-    def determineOrganismColors(self, organisms: list[Organism]):
-        redBenchmark = organisms[random.randint(0, len(organisms) - 1)]
-        greenBenchmark = redBenchmark
-        blueBenchmark = redBenchmark
-
-        for org in organisms:
-            similarity = genome_similarity(redBenchmark.brain.genome, org.brain.genome)
-            org.color.red = math.floor(similarity * 255)
-
-            if org.color.red < greenBenchmark.color.red:
-                greenBenchmark = org
-        
-        for org in organisms:
-            similarity = genome_similarity(greenBenchmark.brain.genome, org.brain.genome)
-            org.color.green = math.floor(similarity * 255)
-
-            if org.color.red + org.color.green < blueBenchmark.color.red + blueBenchmark.color.green:
-                blueBenchmark = org
-            
-        for org in organisms:
-            similarity = genome_similarity(blueBenchmark.brain.genome, org.brain.genome)
-            org.color.blue = math.floor(similarity * 255)
-
 
 class OutputVideo:
     def __init__(self, outputFolder: str, grid: Grid, criteria: SurvivalCriteria):
@@ -96,9 +71,14 @@ class OutputVideo:
             obs.draw(context)
 
         for org in self.grid.organisms:
+            red = org.similarity.getSimilarityFactor(0)
+            green = org.similarity.getSimilarityFactor(1)
+            blue = org.similarity.getSimilarityFactor(2)
+            colorHex = '#{:02x}{:02x}{:02x}'.format(red, green, blue)
+
             context.rectangle((
                 org.loc.x * scaling, org.loc.y * scaling, org.loc.x * scaling + scaling, org.loc.y * scaling + scaling
-            ), fill=org.color.hex())
+            ), fill=colorHex)
 
         imagePath = f"{self.outputFolder}/image_{self.numImages}.png"
         frame.save(imagePath)
@@ -147,9 +127,9 @@ class OutputGraph:
         highestSim = 0
 
         for org in organisms:
-            similarity = org.color.red + org.color.green + org.color.blue
-            if similarity > highestSim:
+            if org.similarity.totalSimilarity() > highestSim:
                 averageOrg = org
+                highestSim = org.similarity.totalSimilarity()
 
         graph = pgv.AGraph(strict=False, directed=True, rankdir="LR")
 
