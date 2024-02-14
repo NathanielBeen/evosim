@@ -6,6 +6,9 @@ class Coord:
     def mapString(self):
         return f'{self.x}_{self.y}'
     
+    def weightedDifference(self, other: 'Coord'):
+        return abs(self.x - other.x) ** 2 + abs(self.y - other.y) ** 2
+    
     def __add__(self, other):
         if not isinstance(other, Coord):
             raise ValueError(f"{other} must be a Coord object")

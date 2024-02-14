@@ -6,13 +6,13 @@ from config import Config
 from .grid import Grid
 from .organism import Organism
 from .output import Output
-from .survivalCriteria import SideSurvialCriteria, SideSurvivalType
+from .survivalCriteria import SideSurvialCriteria, SideSurvivalType, CornerSurvivalCriteria
 from .genome_similarity import calcGenerationSimiarity
 
 class Simulation:
     def __init__(self, outputFolder):
         self.grid = Grid(Config.get(Config.GRID_WIDTH), Config.get(Config.GRID_HEIGHT), Config.get(Config.OBSTACLES))
-        self.survivalStrategy = SideSurvialCriteria(SideSurvivalType.RIGHT, 10)
+        self.survivalStrategy = CornerSurvivalCriteria(6)
         self.output = Output(outputFolder, self.grid, self.survivalStrategy)
         self.organisms: List[Organism] = []
 
@@ -44,8 +44,10 @@ class Simulation:
             newOrganisms = [Organism.gen_random(id, self.grid) for id in range(Config.get(Config.ORGANSISMS))]
         elif Config.get(Config.MATING_STRATEGY) == 0:
             newOrganisms = self.randomMating(self.organisms)
-        else:
+        elif Config.get(Config.MATING_STRATEGY) == 1:
             newOrganisms = self.geneticSimilarityMating(self.organisms)
+        else:
+            newOrganisms = self.locationMating(self.organisms)
         
         calcGenerationSimiarity(newOrganisms, 3)
         self.organisms = newOrganisms
@@ -62,8 +64,22 @@ class Simulation:
         return newOrganisms
 
     # generate a new set of organisms by matching survivors that are genetically similar to each other
-    # and then splicing their genomes together
     def geneticSimilarityMating(self, survivors: list[Organism]) -> list[Organism]:
+        def heuristic(s: Organism, p: Organism):
+            return s.similarity.getWeightedDifference(p.similarity)
+
+        return self.mateBasedOnHeuristic(survivors, heuristic)
+    
+    # generate a new set of organisms by matching survivors that are located close to each other
+    def locationMating(self, survivors: list[Organism]) -> list[Organism]:
+        def heuristic(s: Organism, p: Organism):
+            return s.loc.weightedDifference(p.loc)
+
+        return self.mateBasedOnHeuristic(survivors, heuristic)
+
+    # generate a new set of organisms by matching survivors together basic upon a given heuristic and then
+    # splicing together their genomes
+    def mateBasedOnHeuristic(self, survivors: list[Organism], heuristic) -> list[Organism]:
         pairedSurvivors = {}
         survivorPairs = []
 
@@ -77,11 +93,11 @@ class Simulation:
                 match = None
                 matchDifference = None
 
-                # find the organism that has not already been matched that is most genetically
-                # similar to the current survivor
+                # find the organism that has not already been matched that scores the lowest value 
+                # in the given heuristic
                 for potentialMatch in survivors:
                     if not potentialMatch.id in pairedSurvivors and potentialMatch != survivor:
-                        difference = survivor.similarity.getWeightedDifference(potentialMatch.similarity)
+                        difference = heuristic(survivor, potentialMatch)
                         if not matchDifference or difference < matchDifference:
                             match = potentialMatch
                             matchDifference = difference
@@ -90,12 +106,15 @@ class Simulation:
                 pairedSurvivors[match.id] = True
                 survivorPairs.append([survivor, match])
         
+        # iterate through the matches and create a child with the combined genome of the parents. As there will be fewer
+        # paired survivors than organisms in a generation, pairs will end up produciton 2 or more offspring
         newOrganisms = []
         for id in range(Config.get(Config.ORGANSISMS)):
             index = id % len(survivorPairs)
             newOrganisms.append(Organism.gen_from_parents(id, self.grid, survivorPairs[index][0], survivorPairs[index][1]))
                 
         return newOrganisms
+
 
     def determineSurvivors(self):
         return [org for org in self.organisms if self.survivalStrategy.survived(org)]

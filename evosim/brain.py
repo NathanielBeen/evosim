@@ -3,7 +3,7 @@ import random
 import math
 
 from .node import NodeType, Node, NodeConnection
-from .genome import Genome
+from .genome import Genome, Gene
 
 class Action:
     def __init__(self, id: int, value: float):

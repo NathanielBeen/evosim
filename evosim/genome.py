@@ -36,7 +36,6 @@ class Gene:
         codeOutputId = int(self.code[9:15], 2)
         self.outputId = codeOutputId % Config.get(Config.NUM_INTERNAL_NODES) if self.outputType == NodeType.INNER else codeOutputId % ActionTypes.count()
 
-
     # for the first generation there are no parents, so we must generate a random bit string
     @staticmethod
     def gen_random():

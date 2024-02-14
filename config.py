@@ -16,21 +16,22 @@ class Config:
   SENSE_DISTANCE = "senseDistance"
   MATING_STRATEGY = "matingStrategy"
 
+  RECORD_FREQUENCY = "recordFrequency"
+
   configValues = {
-    GENERATIONS: 2,
-    STEPS: 150,
+    GENERATIONS: 1200,
+    STEPS: 200,
     ORGANSISMS: 100,
     GENES: 10,
-    MUTATE_CHANCE: .05,
+    MUTATE_CHANCE: .01,
     NUM_INTERNAL_NODES: 4,
     GRID_WIDTH: 140,
     GRID_HEIGHT: 140,
     IMAGE_SCALING: 4,
-    OBSTACLES: [
-      [120, 130, 20, 120] # [left, right top, bottom]
-    ],
+    OBSTACLES: [],
     SENSE_DISTANCE: 5,
-    MATING_STRATEGY: 0 # 0 for random mating, 1 for mating based on genetic similarity
+    MATING_STRATEGY: 1, # 0 for random mating, 1 for mating based on genetic similarity, 2 for mating based on location
+    RECORD_FREQUENCY: 200
   }
 
   @staticmethod

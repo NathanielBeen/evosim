@@ -10,7 +10,7 @@ import numpy as np
 from .organism import Organism
 from .grid import Grid
 from .survivalCriteria import SurvivalCriteria
-from .genome_similarity import genome_similarity
+from .genome_similarity import genomeSimilarity, calcGenerationColors
 from config import Config
 
 class Output:
@@ -34,10 +34,11 @@ class Output:
         self.organisms = organisms
         self.genNumber = genNumber
         if self.willRecordGeneration():
+            calcGenerationColors(self.organisms)
             self.video.drawFrame()
 
     def willRecordGeneration(self) -> bool:
-        return self.genNumber == Config.get(Config.GENERATIONS) - 1 or self.genNumber % 300 == 0
+        return self.genNumber == Config.get(Config.GENERATIONS) - 1 or self.genNumber % Config.get(Config.RECORD_FREQUENCY) == 0
     
     def stepComplete(self):
         if self.willRecordGeneration():
@@ -52,6 +53,7 @@ class Output:
 
     def simulationComplete(self):
         self.stats.drawGraph()
+        self.stats.drawSimilarityGraph()
 
 
 class OutputVideo:
@@ -71,14 +73,9 @@ class OutputVideo:
             obs.draw(context)
 
         for org in self.grid.organisms:
-            red = org.similarity.getSimilarityFactor(0)
-            green = org.similarity.getSimilarityFactor(1)
-            blue = org.similarity.getSimilarityFactor(2)
-            colorHex = '#{:02x}{:02x}{:02x}'.format(red, green, blue)
-
             context.rectangle((
                 org.loc.x * scaling, org.loc.y * scaling, org.loc.x * scaling + scaling, org.loc.y * scaling + scaling
-            ), fill=colorHex)
+            ), fill=org.similarity.colorCode)
 
         imagePath = f"{self.outputFolder}/image_{self.numImages}.png"
         frame.save(imagePath)
@@ -154,6 +151,8 @@ class OutputStats:
         self.survivorAverage = []
         self.similarityAverage = []
 
+        self.similarityFactors = []
+
     def addStats(self, organisms: list[Organism], survivors: int):
         self.survivors.append(survivors)
         self.similarity.append(self.calculateAvgSimilarity(organisms))
@@ -169,14 +168,22 @@ class OutputStats:
             self.survivorAverage.append(survivorAverage)
             self.similarityAverage.append(similarityAverage)
 
+        for org in organisms:
+            self.similarityFactors += org.similarity.factors
+
     def calculateAvgSimilarity(self, organsisms: list[Organism]) -> float:
         similarity = []
         for _ in range(30):
             first_genome = organsisms[random.randint(0, len(organsisms) - 1)].brain.genome
             second_genome = organsisms[random.randint(0, len(organsisms) - 1)].brain.genome
-            similarity.append(genome_similarity(first_genome, second_genome))
+            similarity.append(genomeSimilarity(first_genome, second_genome))
         
         return np.mean(similarity)
+    
+    def drawSimilarityGraph(self):
+        plt.figure(2)
+        plt.hist(self.similarityFactors, bins=64)
+        plt.savefig(f"{self.outputFolder}/factorDist.png")
     
     def drawGraph(self):
         x = np.arange(Config.get(Config.GENERATIONS))
